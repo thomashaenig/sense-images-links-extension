@@ -201,7 +201,56 @@ define(["jquery", "text!./dpi-simple-table.css"], function($, cssContent) {'use 
 			canTakeSnapshot : true
 		},
 		paint : function($element, layout) {
-			var html = "<table><thead><tr>", self = this, lastrow = 0, dimcount = this.backendApi.getDimensionInfos().length;
+			let calcHeight = $($element[0]).height()>0?$($element[0]).height()-25:0;
+			var html = "<div class='root' style='height:"+calcHeight+"px'><div class='container'><table><thead><tr>", self = this, lastrow = 0, dimcount = this.backendApi.getDimensionInfos().length;
+
+			let model = this.backendApi.model;
+			let countDim = model.layout.qHyperCube.qDimensionInfo.length;
+
+			window.test = (key, type) => {
+				let key1 = key
+				if(type==="M") {
+					key1 +=  countDim;
+				}
+				let sort = model.layout.qHyperCube.qEffectiveInterColumnSortOrder;
+				let checker = sort[key1];
+
+
+				if(checker > 0) {
+					for (let index = 0; index < sort.length; index++) {
+						if (index === key1) {
+							sort[index] = 0;
+						} else if(sort[index] < checker) {
+							sort[index]++;
+						}
+					}
+					let val = "[" + sort.join(",") + "]";
+	
+					model.enigmaModel.applyPatches([{
+						qOp: "Replace",
+						qPath: "/qHyperCubeDef/qInterColumnSortOrder",
+						qValue: val
+					}], true)
+				} else {
+
+					let path = "";
+					let val = false;
+
+					if(type==="M") {
+						path = "/qHyperCubeDef/qMeasures/"+key+"/qDef/qReverseSort"
+						val = !model.layout.qHyperCube.qMeasureInfo[key].qReverseSort
+					} else {
+						path = "/qHyperCubeDef/qDimensions/"+key+"/qDef/qReverseSort"
+						val = !model.layout.qHyperCube.qDimensionInfo[key].qReverseSort
+					}
+
+					model.enigmaModel.applyPatches([{
+						qOp: "Replace",
+						qPath: path,
+						qValue: val.toString()
+					}], true)
+				}
+			}
 
 			// handle link address and link labels depending on the link option settings
 			function deriveLabels (input) {
@@ -247,10 +296,11 @@ define(["jquery", "text!./dpi-simple-table.css"], function($, cssContent) {'use 
 
 			//render titles
 			$.each(this.backendApi.getDimensionInfos(), function(key, value) {
-				html += '<th align="left">' + value.qFallbackTitle + '</th>';
+				html += "<th align='left'>" + value.qFallbackTitle + "<div onClick='test(" + key + ", \"D\")'>" + value.qFallbackTitle + "<i class='lui-icon lui-icon--triangle-top'></i></div></th>";
 			});
 			$.each(this.backendApi.getMeasureInfos(), function(key, value) {
-				html += '<th align="left">' + value.qFallbackTitle + '</th>';
+				console.log("value", key, value);
+				html += "<th align='left'>" + value.qFallbackTitle + "<div onClick='test(" + key + ", \"M\")'>" + value.qFallbackTitle + "<i class='lui-icon lui-icon--triangle-top'></i></div></th>";
 			});
 			html += "</tr></thead><tbody>";
 			//render data
@@ -367,9 +417,10 @@ define(["jquery", "text!./dpi-simple-table.css"], function($, cssContent) {'use 
 				});
 				html += '</tr>';			    
 			});
-			html += "</tbody></table>";
+			html += "</tbody></table></div></div>";
 			$element.html(html);
 		  	$element.find('.selectable').on('qv-activate', function() {
+				  console.log("this", this);
 				if(this.hasAttribute("data-value")) {
 					var value = parseInt(this.getAttribute("data-value"), 10), dim = parseInt(this.getAttribute("data-dimension"), 10);
 					self.selectValues(dim, [value], true);

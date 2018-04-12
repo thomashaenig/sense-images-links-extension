@@ -1,9 +1,28 @@
 /* CSS */
-.qv-object-dpi-simple-table div.qv-object-content-container {
-	overflow: auto;
+
+.qv-object-dpi-simple-table .root {
+	position: relative;
+    padding-top: 37px;
 }
-.qv-object-dpi-simple-table td,
-.qv-object-dpi-simple-table th {
+
+.qv-object-dpi-simple-table .container {
+	overflow-y: auto;
+	height: 100%;
+}
+
+.qv-object-dpi-simple-table table {
+	width:100%;
+}
+
+
+
+.qv-object-dpi-simple-table table i {
+	font-size: 13px;
+	padding-left: 50%;
+    padding-right: 50%;
+}
+
+.qv-object-dpi-simple-table td, th {
 	border-top: 10px solid #fff;
 	border-bottom: 10px solid #fff;
 	border-right: 10px solid #fff;
@@ -14,9 +33,23 @@
 	cursor: default;
 	font-size: 13px;
 }
-.qv-object-dpi-simple-table td.numeric {
-	text-align: right;
+
+.qv-object-dpi-simple-table th {
+	height: 0;
+	line-height: 0;
+	padding-top: 0;
+	padding-bottom: 0;
 }
-.qv-object-dpi-simple-table button {
-	width: 100%;
+
+.qv-object-dpi-simple-table th div {
+	position: absolute;
+	background: transparent;
+	width: min-content;
+	top: 0;
+	line-height: normal;
 }
+.qv-object-dpi-simple-table th:first-child div{
+	border: none;
+}
+
+
