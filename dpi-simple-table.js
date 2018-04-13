@@ -204,8 +204,6 @@ define(["jquery", "text!./dpi-simple-table.css"], function($, cssContent) {'use 
 			let calcHeight = $($element[0]).height()>0?$($element[0]).height()-25:0;
 			var html = "<div class='root' style='height:"+calcHeight+"px'><div class='container'><table><thead><tr>", self = this, lastrow = 0, dimcount = this.backendApi.getDimensionInfos().length;
 
-			
-			
 			let model = this.backendApi.model;
 			let countDim = model.layout.qHyperCube.qDimensionInfo.length;
 			let countMea = model.layout.qHyperCube.qMeasureInfo.length;
@@ -224,8 +222,6 @@ define(["jquery", "text!./dpi-simple-table.css"], function($, cssContent) {'use 
 			}
 
 			let sort = model.layout.qHyperCube.qEffectiveInterColumnSortOrder;
-			console.log("SORT", sort);
-			
 
 			// handle link address and link labels depending on the link option settings
 			function deriveLabels (input) {
@@ -391,12 +387,11 @@ define(["jquery", "text!./dpi-simple-table.css"], function($, cssContent) {'use 
 						}
 
 				});
-				html += '</tr>';			    
+				html += '</tr>';
 			});
 			html += "</tbody></table></div></div>";
 			$element.html(html);
 		  	$element.find('.selectable').on('qv-activate', function() {
-				  console.log("this", this);
 				if(this.hasAttribute("data-value")) {
 					var value = parseInt(this.getAttribute("data-value"), 10), dim = parseInt(this.getAttribute("data-dimension"), 10);
 					self.selectValues(dim, [value], true);
@@ -404,10 +399,7 @@ define(["jquery", "text!./dpi-simple-table.css"], function($, cssContent) {'use 
 				}
 			});
 
-
-
 			for (let i = 0; i < sort.length; i++) {
-				console.log("I", i)
 				if (sort[i] === 0) {
 
 					let indicator = "A"
@@ -423,29 +415,15 @@ define(["jquery", "text!./dpi-simple-table.css"], function($, cssContent) {'use 
 			}
 
 			window.test = (key, type) => {
+
 				let keyUpdated = key
 				if(type==="M") {
 					keyUpdated +=  countDim;
 				}
 				let sort = model.layout.qHyperCube.qEffectiveInterColumnSortOrder;
-				let checker = sort[keyUpdated];
 
-				if(checker > 0) {
-					for (let index = 0; index < sort.length; index++) {
-						if (index === keyUpdated) {
-							sort[index] = 0;
-						} else if(sort[index] < checker) {
-							sort[index]++;
-						}
-					}
-					let val = "[" + sort.join(",") + "]";
-	
-					model.enigmaModel.applyPatches([{
-						qOp: "Replace",
-						qPath: "/qHyperCubeDef/qInterColumnSortOrder",
-						qValue: val
-					}], true)
-				} else {
+
+				if(keyUpdated===sort[0]) {
 
 					let path = "";
 					let val = false;
@@ -463,7 +441,23 @@ define(["jquery", "text!./dpi-simple-table.css"], function($, cssContent) {'use 
 						qPath: path,
 						qValue: val.toString()
 					}], true)
+				} else {
+
+					for (let i = 0; i < sort.length; i++) {
+						if (sort[i] === keyUpdated) {
+							sort = sort.slice(i, 1);
+						}
+					}
+					sort.unshift(keyUpdated);
+					
+					let val = "[" + sort.join(",") + "]";
+					model.enigmaModel.applyPatches([{
+						qOp: "Replace",
+						qPath: "/qHyperCubeDef/qInterColumnSortOrder",
+						qValue: val
+					}], true)
 				}
+
 			}
 		}
 	};
