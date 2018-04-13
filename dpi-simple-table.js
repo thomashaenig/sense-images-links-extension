@@ -204,53 +204,28 @@ define(["jquery", "text!./dpi-simple-table.css"], function($, cssContent) {'use 
 			let calcHeight = $($element[0]).height()>0?$($element[0]).height()-25:0;
 			var html = "<div class='root' style='height:"+calcHeight+"px'><div class='container'><table><thead><tr>", self = this, lastrow = 0, dimcount = this.backendApi.getDimensionInfos().length;
 
+			
+			
 			let model = this.backendApi.model;
 			let countDim = model.layout.qHyperCube.qDimensionInfo.length;
+			let countMea = model.layout.qHyperCube.qMeasureInfo.length;
+			let countTotal = countDim + countMea;
 
-			window.test = (key, type) => {
-				let key1 = key
-				if(type==="M") {
-					key1 +=  countDim;
-				}
-				let sort = model.layout.qHyperCube.qEffectiveInterColumnSortOrder;
-				let checker = sort[key1];
+			function createGuid() {
+				return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+					var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+					return v.toString(16);
+				});
+			};
 
-
-				if(checker > 0) {
-					for (let index = 0; index < sort.length; index++) {
-						if (index === key1) {
-							sort[index] = 0;
-						} else if(sort[index] < checker) {
-							sort[index]++;
-						}
-					}
-					let val = "[" + sort.join(",") + "]";
-	
-					model.enigmaModel.applyPatches([{
-						qOp: "Replace",
-						qPath: "/qHyperCubeDef/qInterColumnSortOrder",
-						qValue: val
-					}], true)
-				} else {
-
-					let path = "";
-					let val = false;
-
-					if(type==="M") {
-						path = "/qHyperCubeDef/qMeasures/"+key+"/qDef/qReverseSort"
-						val = !model.layout.qHyperCube.qMeasureInfo[key].qReverseSort
-					} else {
-						path = "/qHyperCubeDef/qDimensions/"+key+"/qDef/qReverseSort"
-						val = !model.layout.qHyperCube.qDimensionInfo[key].qReverseSort
-					}
-
-					model.enigmaModel.applyPatches([{
-						qOp: "Replace",
-						qPath: path,
-						qValue: val.toString()
-					}], true)
-				}
+			let arrId = [];
+			for (let i = 0; i < countTotal; i++) {
+				arrId[i] = createGuid();
 			}
+
+			let sort = model.layout.qHyperCube.qEffectiveInterColumnSortOrder;
+			console.log("SORT", sort);
+			
 
 			// handle link address and link labels depending on the link option settings
 			function deriveLabels (input) {
@@ -293,14 +268,15 @@ define(["jquery", "text!./dpi-simple-table.css"], function($, cssContent) {'use 
 				return [label, address];
 			}
 
-
+			let counterKey = 0;
 			//render titles
 			$.each(this.backendApi.getDimensionInfos(), function(key, value) {
-				html += "<th align='left'>" + value.qFallbackTitle + "<div onClick='test(" + key + ", \"D\")'>" + value.qFallbackTitle + "<i class='lui-icon lui-icon--triangle-top'></i></div></th>";
+				html += "<th align='left'>" + value.qFallbackTitle + "<div id='"+arrId[counterKey]+"' onClick='test(" + key + ", \"D\")'>" + value.qFallbackTitle + "</div></th>";
+				counterKey++;
 			});
 			$.each(this.backendApi.getMeasureInfos(), function(key, value) {
-				console.log("value", key, value);
-				html += "<th align='left'>" + value.qFallbackTitle + "<div onClick='test(" + key + ", \"M\")'>" + value.qFallbackTitle + "<i class='lui-icon lui-icon--triangle-top'></i></div></th>";
+				html += "<th align='left'>" + value.qFallbackTitle + "<div id='"+arrId[counterKey]+"' onClick='test(" + key + ", \"M\")'>" + value.qFallbackTitle + "</div></th>";
+				counterKey++;
 			});
 			html += "</tr></thead><tbody>";
 			//render data
@@ -427,6 +403,68 @@ define(["jquery", "text!./dpi-simple-table.css"], function($, cssContent) {'use 
 					$element.find("[data-dimension='"+ dim +"'][data-value='"+ value+"']").toggleClass("selected");
 				}
 			});
+
+
+
+			for (let i = 0; i < sort.length; i++) {
+				console.log("I", i)
+				if (sort[i] === 0) {
+
+					let indicator = "A"
+					if (i < countDim) {
+						indicator = model.layout.qHyperCube.qDimensionInfo[i].qSortIndicator;
+					} else {
+						indicator = model.layout.qHyperCube.qMeasureInfo[i - countDim].qSortIndicator;
+					}
+
+					$("#"+arrId[i]).append("<i class='lui-icon lui-icon--triangle-"+(indicator==="D"?"bottom":"top")+"'></i>")
+				}
+				
+			}
+
+			window.test = (key, type) => {
+				let keyUpdated = key
+				if(type==="M") {
+					keyUpdated +=  countDim;
+				}
+				let sort = model.layout.qHyperCube.qEffectiveInterColumnSortOrder;
+				let checker = sort[keyUpdated];
+
+				if(checker > 0) {
+					for (let index = 0; index < sort.length; index++) {
+						if (index === keyUpdated) {
+							sort[index] = 0;
+						} else if(sort[index] < checker) {
+							sort[index]++;
+						}
+					}
+					let val = "[" + sort.join(",") + "]";
+	
+					model.enigmaModel.applyPatches([{
+						qOp: "Replace",
+						qPath: "/qHyperCubeDef/qInterColumnSortOrder",
+						qValue: val
+					}], true)
+				} else {
+
+					let path = "";
+					let val = false;
+
+					if(type==="M") {
+						path = "/qHyperCubeDef/qMeasures/"+key+"/qDef/qReverseSort"
+						val = !model.layout.qHyperCube.qMeasureInfo[key].qReverseSort
+					} else {
+						path = "/qHyperCubeDef/qDimensions/"+key+"/qDef/qReverseSort"
+						val = !model.layout.qHyperCube.qDimensionInfo[key].qReverseSort
+					}
+
+					model.enigmaModel.applyPatches([{
+						qOp: "Replace",
+						qPath: path,
+						qValue: val.toString()
+					}], true)
+				}
+			}
 		}
 	};
 });
