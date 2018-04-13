@@ -398,21 +398,19 @@ define(["jquery", "text!./dpi-simple-table.css"], function($, cssContent) {'use 
 					$element.find("[data-dimension='"+ dim +"'][data-value='"+ value+"']").toggleClass("selected");
 				}
 			});
-
-			for (let i = 0; i < sort.length; i++) {
-				if (sort[i] === 0) {
-
-					let indicator = "A"
-					if (i < countDim) {
-						indicator = model.layout.qHyperCube.qDimensionInfo[i].qSortIndicator;
-					} else {
-						indicator = model.layout.qHyperCube.qMeasureInfo[i - countDim].qSortIndicator;
-					}
-
-					$("#"+arrId[i]).append("<i class='lui-icon lui-icon--triangle-"+(indicator==="D"?"bottom":"top")+"'></i>")
-				}
-				
+			
+			let sortByHead = sort[0]
+			let headCheck = sortByHead;
+			
+			let indicator = "A"
+			if (sortByHead >= countDim) {
+				headCheck = sortByHead-countDim;
+				indicator = model.layout.qHyperCube.qMeasureInfo[headCheck].qSortIndicator;
+			} else {
+				indicator = model.layout.qHyperCube.qDimensionInfo[headCheck].qSortIndicator;
 			}
+
+			$("#"+arrId[sort[0]]).append("<i class='lui-icon lui-icon--triangle-"+(indicator==="D"?"bottom":"top")+"'></i>")
 
 			window.test = (key, type) => {
 
