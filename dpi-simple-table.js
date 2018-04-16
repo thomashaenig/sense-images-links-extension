@@ -322,69 +322,75 @@ define(["jquery", "text!./dpi-simple-table.css"], function($, cssContent) {'use 
 						var label = '';
 					}
 					// enable selectable
-					if(key < dimcount && cell.qElemNumber > -1) {
+
+					let linkChecker = -1
+					if (cell.qText) {
+						let linkChecker = cell.qText.indexOf("<a href=");
+					}
+
+					if(key < dimcount && cell.qElemNumber > -1 && linkChecker === -1) {
 						html += selectable + "' data-value='" + cell.qElemNumber + "' data-dimension='" + key + "'";
 					} else {
 						html += "'";
 					}
-						if(label !== undefined) {
-							if (!layout.htmlInput) {
-								//if just links is selected, check for links and convert
-								if(layout.linkColumns && !layout.imageColumns){
-									if(address.slice(0,4).toLowerCase()==='http'){
-										html += '> <a href="' + address + '" target="_blank">' + label + '</a></td>';
-									}
-									else if(address.slice(0,3).toLowerCase()==='www'){
-										html += '> <a href="http://' + address + '" target="_blank">' + label + '</a></td>';
-									}
-									else if(address.toLowerCase().indexOf('.com')>0 || address.toLowerCase().indexOf('.net')>0 || address.toLowerCase().indexOf('.edu')>0 || address.toLowerCase().indexOf('.gov')>0) {
-										html += '> <a href="' + address + '" target="_blank">' + label + '</a></td>';
-									}
-									else{
-										html += '>' + address + '</td>';
-									}
+					if(label !== undefined) {
+						if (!layout.htmlInput) {
+							//if just links is selected, check for links and convert
+							if(layout.linkColumns && !layout.imageColumns){
+								if(address.slice(0,4).toLowerCase()==='http'){
+									html += '> <a href="' + address + '" target="_blank">' + label + '</a></td>';
 								}
-								//if just images is selected, check for images and convert
-								else if(layout.imageColumns && !layout.linkColumns){
-									if(~address.toLowerCase().indexOf('img.') || ~address.toLowerCase().indexOf('.jpg') || ~address.toLowerCase().indexOf('.gif') || ~address.toLowerCase().indexOf('.png')){
-									    html += '> <img src="' + address + '" height=' + layout.imageHeight + '></td>';
-									}
-									else{
-										html += '>' + address + '</td>';
-									}
+								else if(address.slice(0,3).toLowerCase()==='www'){
+									html += '> <a href="http://' + address + '" target="_blank">' + label + '</a></td>';
 								}
-								//if both images and links are selected, if an image, convert and add a link
-								//if not an image, just convert to link
-								else if(layout.imageColumns && layout.linkColumns){
-									if(~address.toLowerCase().indexOf('img.') || ~address.toLowerCase().indexOf('.jpg') || ~address.toLowerCase().indexOf('.gif') || ~address.toLowerCase().indexOf('.png')){
-									    html += '> <a href="' + address + '" target="_blank"><img src="' + label + '"" height=' + layout.imageHeight + '></a></td>';
-									}
-									else if(address.slice(0,4).toLowerCase()==='http'){
-										html += '> <a href="' + address + '" target="_blank">' + label + '</a></td>';
-									}
-									else if(address.slice(0,3).toLowerCase()==='www'){
-										html += '> <a href="http://' + address + '" target="_blank">' + label + '</a></td>';
-									}
-									else if(address.toLowerCase().indexOf('.com')>0 || address.toLowerCase().indexOf('.net')>0 || address.toLowerCase().indexOf('.edu')>0 || address.toLowerCase().indexOf('.gov')>0) {
-										html += '> <a href="' + address + '" target="_blank">' + label + '</a></td>';
-									}
-									else{
-										html += '>' + address + '</td>';
-									}
+								else if(address.toLowerCase().indexOf('.com')>0 || address.toLowerCase().indexOf('.net')>0 || address.toLowerCase().indexOf('.edu')>0 || address.toLowerCase().indexOf('.gov')>0) {
+									html += '> <a href="' + address + '" target="_blank">' + label + '</a></td>';
 								}
-							  	//otherwise, no formatting
 								else{
-								html += '>' + address + '</td>';
+									html += '>' + address + '</td>';
 								}
 							}
-							else {
-								html += '>' + cell.qText + '</td>';
+							//if just images is selected, check for images and convert
+							else if(layout.imageColumns && !layout.linkColumns){
+								if(~address.toLowerCase().indexOf('img.') || ~address.toLowerCase().indexOf('.jpg') || ~address.toLowerCase().indexOf('.gif') || ~address.toLowerCase().indexOf('.png')){
+									html += '> <img src="' + address + '" height=' + layout.imageHeight + '></td>';
+								}
+								else{
+									html += '>' + address + '</td>';
+								}
 							}
-						// value is undefined, fill with null value
+							//if both images and links are selected, if an image, convert and add a link
+							//if not an image, just convert to link
+							else if(layout.imageColumns && layout.linkColumns){
+								if(~address.toLowerCase().indexOf('img.') || ~address.toLowerCase().indexOf('.jpg') || ~address.toLowerCase().indexOf('.gif') || ~address.toLowerCase().indexOf('.png')){
+									html += '> <a href="' + address + '" target="_blank"><img src="' + label + '"" height=' + layout.imageHeight + '></a></td>';
+								}
+								else if(address.slice(0,4).toLowerCase()==='http'){
+									html += '> <a href="' + address + '" target="_blank">' + label + '</a></td>';
+								}
+								else if(address.slice(0,3).toLowerCase()==='www'){
+									html += '> <a href="http://' + address + '" target="_blank">' + label + '</a></td>';
+								}
+								else if(address.toLowerCase().indexOf('.com')>0 || address.toLowerCase().indexOf('.net')>0 || address.toLowerCase().indexOf('.edu')>0 || address.toLowerCase().indexOf('.gov')>0) {
+									html += '> <a href="' + address + '" target="_blank">' + label + '</a></td>';
+								}
+								else{
+									html += '>' + address + '</td>';
+								}
+							}
+							//otherwise, no formatting
+							else{
+							html += '>' + address + '</td>';
+							}
 						}
-						else{
-							html += '>' + '</td>';
+						else {
+							html += '>' + cell.qText + '</td>';
 						}
+					// value is undefined, fill with null value
+					}
+					else{
+						html += '>' + '</td>';
+					}
 
 				});
 				html += '</tr>';
