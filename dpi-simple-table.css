@@ -18,8 +18,8 @@
 
 .qv-object-dpi-simple-table table i {
 	font-size: 13px;
-	padding-left: 50%;
-    padding-right: 50%;
+	top: 0;
+	padding-left: 3px;
 }
 
 .qv-object-dpi-simple-table td, th {
